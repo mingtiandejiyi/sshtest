@@ -1,20 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context-4.1.xsd
-        http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd">
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd"
+       default-lazy-init="false">
 
     <!--********************************************配置Spring***************************************-->
-    <!-- 自动扫描 -->
+    <!--&lt;!&ndash; 自动扫描 &ndash;&gt;
     <context:component-scan base-package="com.ssh">
-        <!-- 扫描时跳过 @Controller 注解的JAVA类（控制器） -->
+        &lt;!&ndash; 扫描时跳过 @Controller 注解的JAVA类（控制器） &ndash;&gt;
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-    </context:component-scan>
+    </context:component-scan>-->
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="myRealm"/>
+        <!-- 使用下面配置的缓存管理器 -->
+        <property name="cacheManager" ref="cacheManager"/>
+    </bean>
+    <!--自定义Realm-->
+    <bean id="myRealm" class="com.ssh.shiro.MyRealm"/>
+
+    <!-- 配置shiro的过滤器工厂类，id- shiroFilter要和我们在web.xml中配置的过滤器一致 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- 调用我们配置的权限管理器 -->
+        <property name="securityManager" ref="securityManager"/>
+        <!-- 配置我们的登录请求地址 -->
+        <property name="loginUrl" value="/login.shtml"/>
+        <!-- 配置我们在登录页登录成功后的跳转地址，如果你访问的是非/login地址，则跳到您访问的地址 -->
+        <property name="successUrl" value="/index.shtml"/>
+        <!-- 如果您请求的资源不再您的权限范围，则跳转到/403请求地址 -->
+        <property name="unauthorizedUrl" value="/403.shtml"/>
+        <!-- 权限配置 -->
+        <!-- 自定义权限配置 -->
+        <property name="filterChainDefinitionMap" ref="chainDefinitionSectionMetaSource"/>
+        <property name="filters">
+            <util:map>
+                <entry key="sysUser" value-ref="sysUserFilter"/>
+                <entry key="kickout" value-ref="kickoutSessionControlFilter"/>
+            </util:map>
+        </property>
+    </bean>
+
+
+    <bean id="sysUserFilter" class="com.ssh.shiro.filter.SysUserFilter"/>
+
+    <bean id="kickoutSessionControlFilter" class="com.ssh.shiro.filter.KickoutSessionControlFilter">
+        <property name="userPrefix" value="shiro-kickout-session-key:" />
+        <property name="kickoutAfter" value="false"/>
+        <property name="maxSession" value="1"/>
+        <property name="kickoutUrl" value="/login.shtml"/>
+    </bean>
+
+    <!--自定义filterChainDefinitionMap -->
+    <bean id="chainDefinitionSectionMetaSource" class="com.ssh.shiro.ChainDefinitionSectionMetaSource">
+        <property name="filterChainDefinitions">
+            <value>
+                /favicon.ico = anon
+                /images/** = anon
+                /fonts/** = anon
+                /404/** = anon
+                /error.jsp = anon
+                /css/** = anon
+                /js/** = anon
+                /layer-v1.9.2/** = anon
+                /notebook/** = anon
+                /login.shtml = anon
+                /denied.jsp = anon
+                /install.shtml = anon
+                /druid/** = anon
+                /ligerui/** = anon
+                /bootstrap/** = anon
+                /common/** = anon
+            </value>
+        </property>
+    </bean>
+    <!--shiro缓存管理器-->
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
 
 
     <!--********************************************配置hibernate********************************************-->
@@ -48,9 +119,17 @@
         </property>
     </bean>
 
+    <context:annotation-config/>
+    <context:component-scan base-package="com.ssh">
+        <context:exclude-filter type="regex" expression="com.ssh.controller.*"/>
+    </context:component-scan>
     <!-- 事物管理器配置  -->
-    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
-        <property name="sessionFactory" ref="sessionFactory" />
+    <bean id="transactionManager"
+          class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory" />
+        </property>
     </bean>
 
+    <tx:annotation-driven transaction-manager="transactionManager"/>
 </beans>

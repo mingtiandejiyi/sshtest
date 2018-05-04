@@ -3,6 +3,7 @@ package com.ssh.controller;
 import com.ssh.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,15 +17,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class MainController {
 
     @Autowired
-    private PersonService personService;
-    @Autowired
     private UserService userService;
 
-    @RequestMapping(value = "savePerson", method = RequestMethod.GET)
-    @ResponseBody
-    public String savePerson(){
-        personService.save();
-        return "success!";
+    /**
+     * @return
+     */
+    @RequestMapping(value = "index", method = RequestMethod.GET, produces = "text/html; charset=utf-8")
+    public String login(Model model) {
+        model.addAttribute("error","");
+        return "index";
     }
 
     @RequestMapping(value = "saveUser", method = RequestMethod.GET)

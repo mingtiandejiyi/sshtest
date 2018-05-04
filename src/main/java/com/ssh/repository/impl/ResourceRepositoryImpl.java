@@ -1,9 +1,10 @@
 package com.ssh.repository.impl;
 
-import com.ssh.entity.LyUser;
-import com.ssh.repository.UserRepository;
+import com.ssh.entity.LyResources;
+import com.ssh.repository.ResourceRepository;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * On 2/2/2017.2:30 PM
  */
 @Repository
-public class UserRepositoryImpl implements UserRepository {
+public class ResourceRepositoryImpl implements ResourceRepository {
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -23,42 +24,36 @@ public class UserRepositoryImpl implements UserRepository {
         return this.sessionFactory.openSession();
     }
 
-    public LyUser load(Long id) {
-        return (LyUser)getCurrentSession().load(LyUser.class,id);
+    public LyResources load(Long id) {
+        return (LyResources)getCurrentSession().load(LyResources.class,id);
     }
 
-    public LyUser get(Long id) {
-        return (LyUser)getCurrentSession().get(LyUser.class,id);
+    public LyResources get(Long id) {
+        return (LyResources)getCurrentSession().get(LyResources.class,id);
     }
 
-    public List<LyUser> findAll() {
-        return null;
+    public List<LyResources> findAll() {
+        return Lists.newArrayList();
     }
 
-    public void persist(LyUser entity) {
+    public void persist(LyResources entity) {
         getCurrentSession().persist(entity);
     }
 
-    public Long save(LyUser entity) {
+    public Long save(LyResources entity) {
         return (Long)getCurrentSession().save(entity);
     }
 
-    public void saveOrUpdate(LyUser entity) {
+    public void saveOrUpdate(LyResources entity) {
         getCurrentSession().saveOrUpdate(entity);
     }
 
     public void delete(Long id) {
-        LyUser user = load(id);
-        getCurrentSession().delete(user);
+        LyResources lyResources = load(id);
+        getCurrentSession().delete(lyResources);
     }
 
     public void flush() {
         getCurrentSession().flush();
-    }
-
-    public LyUser findByName(String userName){
-        LyUser lyUser=new LyUser();
-        
-        return  lyUser;
     }
 }
