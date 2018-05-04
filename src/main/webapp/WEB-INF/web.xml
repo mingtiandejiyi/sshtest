@@ -81,6 +81,33 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!--
+    该过滤器使得开发者可以通过org.jasig.cas.client.util.AssertionHolder来获取用户的登录名。
+    比如AssertionHolder.getAssertion().getPrincipal().getName()。
+    -->
+    <filter>
+        <filter-name>CAS Assertion Thread Local Filter</filter-name>
+        <filter-class>org.jasig.cas.client.util.AssertionThreadLocalFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CAS Assertion Thread Local Filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- 自动根据单点登录的结果设置本系统的用户信息（具体某一个应用实现） -->
+    <filter>
+        <filter-name>CasForInvokeContextFilter</filter-name>
+        <filter-class>com.ssh.filter.CasForInvokeContextFilter</filter-class>
+        <init-param>
+            <param-name>appId</param-name>
+            <param-value>a5ea611bbff7474a81753697a1714fb0</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CasForInvokeContextFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <!--加载Spring的配置文件到上下文中去-->
     <context-param>
         <param-name>contextConfigLocation</param-name>

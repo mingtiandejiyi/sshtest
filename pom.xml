@@ -24,7 +24,7 @@
     <lombokVersion>1.16.10</lombokVersion>
     <commons-lang3.version>3.1</commons-lang3.version>
     <guava.version>18.0</guava.version>
-    <java.cas.client.version>3.5.0</java.cas.client.version>
+    <java.cas.client.version>3.4.1</java.cas.client.version>
   </properties>
 
   <dependencies>
